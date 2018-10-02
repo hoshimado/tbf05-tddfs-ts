@@ -1,0 +1,26 @@
+{
+  "name": "typescript1st",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "author": "hoshimado",
+  "license": "MIT",
+  "dependencies": {
+    "typescript": "^3.1.1"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.1.6",
+    "@types/mocha": "^5.2.5",
+    "@types/sinon": "^5.0.2",
+    "chai": "^4.2.0",
+    "mocha": "^5.2.0",
+    "promise-test-helper": "^0.2.1",
+    "sinon": "^6.3.4"
+  }
+}
