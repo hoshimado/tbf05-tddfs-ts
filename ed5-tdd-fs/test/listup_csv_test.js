@@ -2,6 +2,8 @@
  * [listup_csv_test.js]
  *   encoding=UTF8
  */
+
+
 var assert = require("chai").assert;
 var expect = require("chai").expect;
 var sinon = require("sinon");
