@@ -11,8 +11,44 @@ hook["fs"] = require("fs");
 
 
 exports.diffCsvInDir = function ( targetDir ) {
-    return Promise.resolve([]);    
+    var promise = hook.listupSubDirectoryPath( targetDir );
+    return promise.then(function (list) {
+        var sorted = list.sort(function(a,b){
+            if( a < b ) return -1;
+            if( a > b ) return 1;
+            return 0;
+        });
+        var n = sorted.length;
+        var filesTextPromise = []
+        while(0<n--){
+            filesTextPromise.push( readFilePromise(sorted[n]) );
+        }
+        return Promise.all(filesTextPromise);
+    }).then(function (list) {
+        var i, n = list.length;
+        var itemBefore, itemAfter
+        var resultsArray = []
+        for( i=1; i<n; i++ ){
+            itemAfter = csvSync( list[i-1] );
+            itemBefore = csvSync( list[i] );
+            resultsArray.push( hook.diffMapFrom2Csv( itemAfter, itemBefore ) );
+        }
+        return Promise.resolve( resultsArray );
+    });    
 };
+
+var readFilePromise = function (targetPath) {
+    return new Promise(function (resolve,reject) {
+        hook.fs.readFile( targetPath, "utf8", function (err, data) {
+           if( err ){
+               reject(err);
+           }else{
+               resolve(data);
+           }
+        });
+    })
+};
+
 
 hook["diffMapFrom2Csv"] = function (csvArray2, csvArray1) {
     var i, n, item;
@@ -35,6 +71,11 @@ hook["diffMapFrom2Csv"] = function (csvArray2, csvArray1) {
         }
     }
 
+    listDiffMap2 = listDiffMap2.sort(function(a,b){
+        if( a.name < b.name ) return -1;
+        if( a.name > b.name ) return 1;
+        return 0;
+    });
     return listDiffMap2;
 };
 
