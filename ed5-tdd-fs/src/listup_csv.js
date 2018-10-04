@@ -15,7 +15,27 @@ exports.diffCsvInDir = function ( targetDir ) {
 };
 
 hook["diffMapFrom2Csv"] = function (csvArray2, csvArray1) {
-    return [];
+    var i, n, item;
+    var listDiffMap2 = [], map1 = {};
+
+    n = csvArray1.length;
+    while(0<n--){
+        item = csvArray1[n];
+        map1[ item[0] ] = item[1];
+    }
+    n = csvArray2.length;
+    while(0<n--){
+        item = csvArray2[n];
+        if( map1[ item[0] ] != item[1] ){
+            listDiffMap2.push({
+                "name"   : item[0],
+                "before" : map1[ item[0] ],
+                "after"  : item[1]
+            });
+        }
+    }
+
+    return listDiffMap2;
 };
 
 
