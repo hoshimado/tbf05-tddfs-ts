@@ -14,8 +14,104 @@ var hookProperty = require("hook-test-helper").hookProperty; // for test code.
 var target = require("../src/listup_csv.js");
 
 describe("TEST for listup_csv_csv.js", function(){
+    describe("::diffCsvInDir()", function () {
+        var diffCsvInDir = target.diffCsvInDir;
+
+        var stubbedManager = {};
+        var stubs;
+        beforeEach(()=>{
+            stubs = {
+                "fs" : {
+                    "readFile" : sinon.stub()
+                },
+                "listupSubDirectoryPath" : sinon.stub()
+            };
+            stubbedManager["hook"] = hookProperty(target.hook, stubs);
+        });
+        afterEach(()=>{
+            stubbedManager.hook.restore();
+        });
+
+        it("フォルダから取得したcsvの差分を取得", function () {
+            var TARGET_PATH = "./data/in-stub";
+            var PATH1 = "./data/in-stub/sub1/v2017.01.csv";
+            var PATH2 = "./data/in-stub/sub1/v2017.02.csv"
+            var PATH3 = "./data/in-stub/sub1/v2017.03.csv"
+            stubs.fs.readFile.withArgs(PATH1)
+            .callsArgWith(
+                2, 
+                /* err= */ null, 
+                /* files= */ "Tool1,v1.00.00,tool1.exe\r\nTool2,v1.00.00,tool2_final.exe\r\n" 
+            );
+            stubs.fs.readFile.withArgs(PATH2)
+            .callsArgWith(
+                2, 
+                /* err= */ null, 
+                /* files= */ "Tool1,v1.01.00,tool1.exe\r\nTool2,v1.00.00,tool2_final.exe\r\nTool3,v0.02,tool3_beta.exe\r\n" 
+            );
+            stubs.fs.readFile.withArgs(PATH3)
+            .callsArgWith(
+                2, 
+                /* err= */ null, 
+                /* files= */ "Tool1,v2.00.00,tool1.exe\r\nTool3,v1.00,tool3.exe\r\n" 
+            );
+            stubs.listupSubDirectoryPath.returns(
+                Promise.resolve([
+                    PATH1, PATH2, PATH3
+                ])
+            );
+            
+            return shouldFulfilled( diffCsvInDir(TARGET_PATH) )
+            .then(function (result) {
+                expect( result ).to.deep
+                .equal([
+                    {
+                        "Tool1" : {
+                            "before" : "v1.00.00",
+                            "after"  : "v1.01.00"
+                        },
+                        "Tool3" : {
+                            "before" : null,
+                            "after" : "v0.02"
+                        }
+                    }
+                ]);
+                 
+ 
+            });
+        });
+    });
+    describe("::diffMapFrom2Csv()", function () {
+        var diffMapFrom2Csv = target.hook.diffMapFrom2Csv;
+
+        it("CSVの２ファイルを比較して差分テキストを出力する", function () {
+            var CSV_ARRAY1 = [
+                ["Tool1","v1.00.00","tool1.exe"],
+                ["Tool2","v1.00.00","tool2_final.exe"]
+            ];
+            var CSV_ARRAY2 = [
+                ["Tool1","v1.01.00","tool1.exe"],
+                ["Tool2","v1.00.00","tool2_final.exe"],
+                ["Tool3","v0.02","tool3_beta.exe"]
+            ];
+
+            var result = diffMapFrom2Csv( CSV_ARRAY2, CSV_ARRAY1 );
+
+            var EXPECTED_MAP = {
+                "Tool1" : {
+                    "before" : "v1.00.00",
+                    "after"  : "v1.01.00"
+                },
+                "Tool3" : {
+                    "before" : null,
+                    "after" : "v0.02"
+                }
+            }
+            expect( result ).to.be.deep.equal( EXPECTED_MAP );
+        });
+    });
     describe("::listupSubDirectryPath()",function () {
-        var listupSubDirectoryPath = target.listupSubDirectoryPath;
+        var listupSubDirectoryPath = target.hook.listupSubDirectoryPath;
 
         var stubbedManager = {};
         var stubs;

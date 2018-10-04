@@ -9,6 +9,28 @@ var path = require("path");
 
 hook["fs"] = require("fs");
 
+
+exports.diffCsvInDir = function ( targetDir ) {
+    return Promise.resolve([]);    
+};
+
+hook["diffMapFrom2Csv"] = function (csvArray2, csvArray1) {
+    return {};
+};
+
+/*
+exports.diffCsvInDir = function ( targetDir ) {
+    return Promise.resolve([]);    
+};
+
+hook["diffMapFrom2Csv"] = function (csvArray2, csvArray1) {
+    return {};
+};
+*/
+
+
+
+
 var promiseStat = function ( targetDir, name ) {
     var targetPath = targetDir + "/" + name;
 
@@ -79,7 +101,7 @@ var promiseReadDirRecursive = function (targetDir, directory2live) {
     });
 };
 
-exports.listupSubDirectoryPath = function ( targetDir ) {
+hook["listupSubDirectoryPath"] = function ( targetDir ) {
     // 深さを「２」とする。
     return promiseReadDirRecursive( targetDir, 2 ).then(function (list) {
         return Promise.resolve(list);
