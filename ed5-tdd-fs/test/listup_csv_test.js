@@ -105,12 +105,13 @@ describe("TEST for listup_csv_csv.js", function(){
         });
         it("ファイルもサブフォルダも無いケース",function () {
             var TARGET_DIR = "./data/in-stub"; 
-            stubs.fs.readdir.withArgs("./data/in-stub")
-            .callsArgWith(2, /* err= */ null, /* files= */ [] );
+            stubs.fs.readdir.callsArgWith(2, /* err= */ null, /* files= */ [] );
 
             return shouldFulfilled(
                 listupSubDirectoryPath( TARGET_DIR )
             ).then(function (result) {
+                expect( stubs.fs.readdir.getCall(0).args[0] ).to.be.equal( TARGET_DIR );
+
                 assert( result );
                 assert( Array.isArray(result) );
 

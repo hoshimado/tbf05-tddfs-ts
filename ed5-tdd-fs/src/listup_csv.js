@@ -26,7 +26,7 @@ var promiseStat = function ( targetDir, name ) {
     });
 };
 
-var promiseReadDirRecursive = function (targetDir, directory2live) {
+var promiseReadDir = function ( targetDir ) {
     return new Promise(function (resolve, reject) {
         hook.fs.readdir( targetDir, "utf8", function (err, files) {
             var n, promiseDirArray = [], targetPath;
@@ -44,7 +44,11 @@ var promiseReadDirRecursive = function (targetDir, directory2live) {
                 });
             }
         });
-    }).then(function (results) {
+    });
+};
+
+var promiseReadDirRecursive = function (targetDir, directory2live) {
+    return promiseReadDir( targetDir ).then(function (results) {
         var outputList = [];
         var n = results.length, targetPath;
         var promiseDirArray = [];
