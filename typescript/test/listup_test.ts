@@ -4,21 +4,100 @@
  */
 
 import { describe, it } from "mocha";
-import { expect } from "chai";
+import { expect, assert } from "chai";
+import * as sinon from "sinon";
+import { hookProperty } from "hook-test-helper";
 
-import { listupSubDirectoryPath } from '../src/listup';
+import * as target from '../src/listup';
 
-
-describe('TEST for listup_csv_csv.js', () => {
+describe('TEST for listup.js', () => {
     describe("::listupSubDirectryPath()", () => {
-        it("Csvファイルが格納されたディレクトリ（1つ下のサブを含む）から、Csvファイルのパスを全て取得する", async () => {
+        const listupSubDirectoryPath = target.listupSubDirectoryPath;
+
+        let stubbedManager;
+        let stubs;
+        beforeEach(()=>{
+            stubs = {
+                "fs" : {
+                    "readdir" : sinon.stub(), // https://nodejs.org/api/fs.html#fs_fs_readdir_path_options_callback
+                    "stat" : sinon.stub()     // https://nodejs.org/api/fs.html#fs_fs_stat_path_options_callback
+                }
+            };
+            stubbedManager = {
+                "hook" : hookProperty(target.hook, stubs)
+            };
+        });
+        afterEach(()=>{
+            stubbedManager.hook.restore();
+        });
+
+        const setupFsStubs = function(targetStubs){
+            targetStubs.fs.readdir.withArgs("./data/in-stub")
+            .callsArgWith(2, /* err= */ null, /* files= */ ["sub1","sub2","moreDeep"] );
+            targetStubs.fs.stat.withArgs("./data/in-stub/sub1")
+            .callsArgWith(1, /* err= */ null, /* stats= */ {"isDirectory" : function (){return true;}} );
+            targetStubs.fs.stat.withArgs("./data/in-stub/sub2")
+            .callsArgWith(1, /* err= */ null, /* stats= */ {"isDirectory" : function (){return true;}} );
+            targetStubs.fs.stat.withArgs("./data/in-stub/moreDeep")
+            .callsArgWith(1, /* err= */ null, /* stats= */ {"isDirectory" : function (){return true;}} );
+
+            targetStubs.fs.readdir.withArgs("./data/in-stub/sub1")
+            .callsArgWith(2, /* err= */ null, /* files= */ ["v2017.01.csv","v2017.02.csv","v2017.03.csv"] );
+            targetStubs.fs.stat.withArgs("./data/in-stub/sub1/v2017.01.csv")
+            .callsArgWith(1, /* err= */ null, /* stats= */ {"isDirectory" : function (){return false;}} );
+            targetStubs.fs.stat.withArgs("./data/in-stub/sub1/v2017.02.csv")
+            .callsArgWith(1, /* err= */ null, /* stats= */ {"isDirectory" : function (){return false;}} );
+            targetStubs.fs.stat.withArgs("./data/in-stub/sub1/v2017.03.csv")
+            .callsArgWith(1, /* err= */ null, /* stats= */ {"isDirectory" : function (){return false;}} );
+
+            targetStubs.fs.readdir.withArgs("./data/in-stub/sub2")
+            .callsArgWith(2, /* err= */ null, /* files= */ ["v2018.01.csv","v2018.02.csv"] );
+            targetStubs.fs.stat.withArgs("./data/in-stub/sub2/v2018.01.csv")
+            .callsArgWith(1, /* err= */ null, /* stats= */ {"isDirectory" : function (){return false;}} );
+            targetStubs.fs.stat.withArgs("./data/in-stub/sub2/v2018.02.csv")
+            .callsArgWith(1, /* err= */ null, /* stats= */ {"isDirectory" : function (){return false;}} );
+
+            targetStubs.fs.readdir.withArgs("./data/in-stub/moreDeep")
+            .callsArgWith(2, /* err= */ null, /* files= */ ["hoge.txt","piyo"] );
+            targetStubs.fs.stat.withArgs("./data/in-stub/moreDeep/hoge.txt")
+            .callsArgWith(1, /* err= */ null, /* stats= */ {"isDirectory" : function (){return false;}} );
+            targetStubs.fs.stat.withArgs("./data/in-stub/moreDeep/piyo")
+            .callsArgWith(1, /* err= */ null, /* stats= */ {"isDirectory" : function (){return true;}} );
+
+            targetStubs.fs.readdir.withArgs("./data/in-stub/moreDeep/piyo")
+            .callsArgWith(2, /* err= */ null, /* files= */ ["limit.txt"] );
+            targetStubs.fs.stat.withArgs("./data/in-stub/moreDeep/piyo/limit.txt")
+            .callsArgWith(1, /* err= */ null, /* stats= */ {"isDirectory" : function (){return false;}} );
+        };
+
+        it( "csvファイルが格納されたディレクトリ（1つ下のサブを含む）から、csvファイルのパスを全て取得する", 
+        async ()=>{
             const TARGET_DIR:string = "./data/in-stub"; 
+            const EXPECTED_LIST:string[] = [
+                './data/in-stub/sub2/v2018.01.csv',
+                './data/in-stub/sub2/v2018.02.csv',
+                './data/in-stub/sub1/v2017.01.csv',
+                './data/in-stub/sub1/v2017.02.csv',
+                './data/in-stub/sub1/v2017.03.csv',
+                './data/in-stub/moreDeep/hoge.txt',
+                './data/in-stub/moreDeep/piyo/' // 個の下は2階層下なので「limit.txt」は拾わないこと。
+            ];
+            setupFsStubs(stubs);
 
             const result:string[] = await listupSubDirectoryPath( TARGET_DIR )
             .catch((err)=>{throw err;});
 
-            expect( result ).to.deep.equal( ["hello world.txt"] );
-            console.log(result);
+            result.sort(function(a,b){
+                if( a < b ) return -1;
+                if( a > b ) return 1;
+                return 0;
+            });
+            EXPECTED_LIST.sort(function(a,b){
+                if( a < b ) return -1;
+                if( a > b ) return 1;
+                return 0;
+            });
+            expect( result ).to.deep.equal( EXPECTED_LIST );
         });
     });
 });

@@ -21,6 +21,7 @@
     "@types/mocha": "^5.2.5",
     "@types/sinon": "^5.0.2",
     "chai": "^4.2.0",
+    "hook-test-helper": "^0.1.1",
     "mocha": "^5.2.0",
     "sinon": "^6.3.4"
   }
