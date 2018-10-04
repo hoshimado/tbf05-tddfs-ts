@@ -5,7 +5,7 @@
 
 var createHookPoint = require("hook-test-helper").createHookPoint;
 var hook = createHookPoint( exports, "hook" );
-var path = require("path");
+var csvSync = require("csv-parse/lib/sync");
 
 hook["fs"] = require("fs");
 
@@ -15,19 +15,8 @@ exports.diffCsvInDir = function ( targetDir ) {
 };
 
 hook["diffMapFrom2Csv"] = function (csvArray2, csvArray1) {
-    return {};
+    return [];
 };
-
-/*
-exports.diffCsvInDir = function ( targetDir ) {
-    return Promise.resolve([]);    
-};
-
-hook["diffMapFrom2Csv"] = function (csvArray2, csvArray1) {
-    return {};
-};
-*/
-
 
 
 

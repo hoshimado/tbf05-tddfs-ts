@@ -19,6 +19,7 @@
     "sinon": "^6.3.4"
   },
   "dependencies": {
+    "csv-parse": "^3.1.2",
     "hook-test-helper": "^0.1.1"
   }
 }

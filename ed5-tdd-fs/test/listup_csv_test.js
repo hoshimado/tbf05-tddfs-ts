@@ -24,7 +24,8 @@ describe("TEST for listup_csv_csv.js", function(){
                 "fs" : {
                     "readFile" : sinon.stub()
                 },
-                "listupSubDirectoryPath" : sinon.stub()
+                "listupSubDirectoryPath" : sinon.stub(),
+                "diffMapFrom2Csv" : target.hook.diffMapFrom2Csv
             };
             stubbedManager["hook"] = hookProperty(target.hook, stubs);
         });
@@ -37,23 +38,35 @@ describe("TEST for listup_csv_csv.js", function(){
             var PATH1 = "./data/in-stub/sub1/v2017.01.csv";
             var PATH2 = "./data/in-stub/sub1/v2017.02.csv"
             var PATH3 = "./data/in-stub/sub1/v2017.03.csv"
+
+            var TEXT1 =  "Tool1,v1.00.00,tool1.exe\r\n";
+                TEXT1 += "Tool2,v1.00.00,tool2_final.exe\r\n";
+
+            var TEXT2 = "Tool3,v0.02,tool3_beta.exe\r\n";
+                TEXT2 += "Tool2,v1.00.00,tool2_final.exe\r\n";
+                TEXT2 += "Tool1,v1.01.00,tool1.exe\r\n";
+                
+            var TEXT3  = "Tool1,v2.00.00,tool1.exe\r\n";
+                TEXT3 += "Tool2,v3.14.15,tool2_fix.exe\r\n";
+                TEXT3 += "Tool3,v0.02,tool3_beta.exe\r\n";
+
             stubs.fs.readFile.withArgs(PATH1)
             .callsArgWith(
                 2, 
                 /* err= */ null, 
-                /* files= */ "Tool1,v1.00.00,tool1.exe\r\nTool2,v1.00.00,tool2_final.exe\r\n" 
+                /* files= */ TEXT1 
             );
             stubs.fs.readFile.withArgs(PATH2)
             .callsArgWith(
                 2, 
                 /* err= */ null, 
-                /* files= */ "Tool1,v1.01.00,tool1.exe\r\nTool2,v1.00.00,tool2_final.exe\r\nTool3,v0.02,tool3_beta.exe\r\n" 
+                /* files= */ TEXT2 
             );
             stubs.fs.readFile.withArgs(PATH3)
             .callsArgWith(
                 2, 
                 /* err= */ null, 
-                /* files= */ "Tool1,v2.00.00,tool1.exe\r\nTool3,v1.00,tool3.exe\r\n" 
+                /* files= */ TEXT3 
             );
             stubs.listupSubDirectoryPath.returns(
                 Promise.resolve([
@@ -65,19 +78,14 @@ describe("TEST for listup_csv_csv.js", function(){
             .then(function (result) {
                 expect( result ).to.deep
                 .equal([
-                    {
-                        "Tool1" : {
-                            "before" : "v1.00.00",
-                            "after"  : "v1.01.00"
-                        },
-                        "Tool3" : {
-                            "before" : null,
-                            "after" : "v0.02"
-                        }
-                    }
+                    [ 
+                        { name: 'Tool1', before: 'v1.01.00', after: 'v2.00.00' },
+                        { name: 'Tool2', before: 'v1.00.00', after: 'v3.14.15' }
+                    ],[ 
+                        { name: 'Tool1', before: 'v1.00.00', after: 'v1.01.00' },
+                        { name: 'Tool3', before: undefined, after: 'v0.02' }
+                    ] 
                 ]);
-                 
- 
             });
         });
     });
@@ -90,24 +98,24 @@ describe("TEST for listup_csv_csv.js", function(){
                 ["Tool2","v1.00.00","tool2_final.exe"]
             ];
             var CSV_ARRAY2 = [
-                ["Tool1","v1.01.00","tool1.exe"],
+                // 順序はランダム。
                 ["Tool2","v1.00.00","tool2_final.exe"],
+                ["Tool1","v1.01.00","tool1.exe"],
                 ["Tool3","v0.02","tool3_beta.exe"]
             ];
 
             var result = diffMapFrom2Csv( CSV_ARRAY2, CSV_ARRAY1 );
 
-            var EXPECTED_MAP = {
-                "Tool1" : {
-                    "before" : "v1.00.00",
-                    "after"  : "v1.01.00"
-                },
-                "Tool3" : {
-                    "before" : null,
-                    "after" : "v0.02"
-                }
-            }
-            expect( result ).to.be.deep.equal( EXPECTED_MAP );
+            var EXPECTED_ARRAY = [{
+                "name" : "Tool1",
+                "before" : "v1.00.00",
+                "after"  : "v1.01.00"
+            },{
+                "name" : "Tool3",
+                "before" : undefined,
+                "after"  : "v0.02"
+            }]; // 順序はnameプロパティで昇順
+            expect( result ).to.be.deep.equal( EXPECTED_ARRAY );
         });
     });
     describe("::listupSubDirectryPath()",function () {
