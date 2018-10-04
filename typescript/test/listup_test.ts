@@ -5,7 +5,6 @@
 
 import { describe, it } from "mocha";
 import { expect } from "chai";
-import { shouldFulfilled } from "promise-test-helper";
 
 import { listupSubDirectoryPath } from '../src/listup';
 
