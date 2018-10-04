@@ -88,6 +88,7 @@ describe("TEST for listup_csv_csv.js", function(){
                 listupSubDirectoryPath( TARGET_DIR )
             ).then(function (result) {
                 assert( result );
+                assert( Array.isArray(result) );
 
                 result.sort(function(a,b){
                     if( a < b ) return -1;
@@ -102,5 +103,23 @@ describe("TEST for listup_csv_csv.js", function(){
                 expect( result ).to.deep.equal( EXPECTED_LIST );
             });
         });
+        it("ファイルもサブフォルダも無いケース",function () {
+            var TARGET_DIR = "./data/in-stub"; 
+            stubs.fs.readdir.withArgs("./data/in-stub")
+            .callsArgWith(2, /* err= */ null, /* files= */ [] );
+
+            return shouldFulfilled(
+                listupSubDirectoryPath( TARGET_DIR )
+            ).then(function (result) {
+                assert( result );
+                assert( Array.isArray(result) );
+
+                expect( result ).to.deep.equal( [] );
+
+                expect( stubs.fs.readdir.callCount ).to.be.equal( 1 );
+                assert( stubs.fs.stat.notCalled, "fs.stat()は呼ばない" );
+            });
+        });
+        it("指定のフォルダがそもそも無いケース");
     });
 });
