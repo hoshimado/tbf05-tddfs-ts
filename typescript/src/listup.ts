@@ -18,7 +18,7 @@ interface StatWithName {
     "stats" : fs.Stats
 };
 
-var promiseStat = ( targetDir:string, name:string ) => {
+const promiseStat = ( targetDir:string, name:string ) => {
     const targetPath:string = targetDir + "/" + name;
 
     return new Promise(function (resolve,reject) {
@@ -35,10 +35,11 @@ var promiseStat = ( targetDir:string, name:string ) => {
     });
 };
 
-var promiseReadDirRecursive = (targetDir, directory2live) => {
+const promiseReadDirRecursive = (targetDir:string, directory2live:number) => {
     return new Promise(function (resolve, reject) {
         hook.fs.readdir( targetDir, "utf8", function (err, files) {
-            var n, promiseDirArray = [], targetPath;
+            let n;
+            const promiseDirArray = [];
             if(err){
                 reject(err);
             }else{
@@ -54,9 +55,9 @@ var promiseReadDirRecursive = (targetDir, directory2live) => {
             }
         });
     }).then(function (results:StatWithName[]) {
-        var outputList = [];
-        var n = results.length, targetPath;
-        var promiseDirArray = [];
+        const outputList = [];
+        let n = results.length, targetPath;
+        const promiseDirArray = [];
         directory2live--;
 
         while(0<n--){
@@ -75,7 +76,7 @@ var promiseReadDirRecursive = (targetDir, directory2live) => {
             }
         }
         return Promise.all( promiseDirArray ).then(function (subLists) {
-            var n = subLists.length;
+            let n = subLists.length;
             while(0<n--){
                 Array.prototype.push.apply(outputList, subLists[n]);
             }
