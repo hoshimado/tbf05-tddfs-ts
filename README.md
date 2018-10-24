@@ -4,6 +4,8 @@
 ## Description
 これは、技術書典５で頒布した「ファイル処理スクリプトをJavaScript/TypeScript でTDD する　～Sinon.js でAPI のスタブ作成～」本のサンプルコードです。
 
+頒布本のサポートページは以下です。
+http://fluorite.halfmoon.jp/word/tbf05_stub_typescript/index.html
 
 ## 第１章
 
@@ -11,19 +13,20 @@
 
 dev11-justframe-only
 
-§２：APIの挙動を探る
+§２：初めて触れるAPI の挙動を探ってみる
 
 dev12-api-actual
 dev13-api-assertion
 
-§３：スタブ化
+§３：外部環境依存のAPI をスタブ化する
 
 dev14-api-stub
+
+§４：様々なケースを追加して仕様を固めていく
+
 dev15-api-stub2
 
-§４：他のテストケースを追加
-
-§５：リファクタリング
+§５：リファクタリングと改良について
 
 dev16-refactoring
 
@@ -35,21 +38,20 @@ dev18-add-functoin-mistake
 
 
 ##第２章
-§１：TypeScriptでHello wolrd
+
+§２：TypeScript 向けのMocha テスト環境を導入する
 
 dev21-hello-typescript-mocha
-
-§２：テスト環境の導入
-
 dev22-ts-node-mocha
+
+§３：テストコードを追加する
+
 dev23-ts-sinon
 
-§３：コード追加
-§４：実装
+§４：被テストのコードを実装する
 
 dev24-impl-listup
 
-§５：実際の環境での動作
 
 
 # License
