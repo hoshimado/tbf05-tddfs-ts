@@ -37,7 +37,7 @@ dev18-add-function-ok
 dev18-add-functoin-mistake
 
 
-##第２章
+## 第２章
 
 §２：TypeScript 向けのMocha テスト環境を導入する
 
