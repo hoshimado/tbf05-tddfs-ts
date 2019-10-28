@@ -1,5 +1,5 @@
 /**
- * [lidex.ts]
+ * [index.ts]
  *   encoding=UTF8
  */
 
